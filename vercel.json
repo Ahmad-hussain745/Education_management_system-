@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/automation",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-report",
+      "schedule": "0 5 * * 1"
+    },
+    {
+      "path": "/api/cron/automation?job=inventory-alerts",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/automation?job=queue-worker",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

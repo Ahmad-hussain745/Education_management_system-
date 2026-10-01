@@ -1,0 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  /* 15px base instead of the browser's 16px default — every rem-based size
+     across the app (including Tailwind's text-sm/text-xs used everywhere)
+     shrinks with it, which is what actually makes the whole interface read
+     as compact rather than just the pages we touch directly. Deliberately
+     not smaller than this: still comfortably legible on a phone. */
+  font-size: 15px;
+}
+
+body {
+  background: #F3F6FC;
+  color: #1E2536;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* A visible, on-brand focus ring everywhere — inputs, links, buttons —
+   instead of each component having to remember its own. Professional
+   software is keyboard-navigable software. */
+:focus-visible {
+  outline: 2px solid #2454C7;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Thin, unobtrusive scrollbars (WebKit + Firefox) — the default chunky
+   system scrollbar reads as unfinished next to everything else here. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #C7D2E8 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #C7D2E8;
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Every list page follows the same card pattern: a rounded, bordered
+   container with overflow-hidden (so the corners stay rounded) directly
+   wrapping a <table>. On a phone that table is almost always wider than
+   the screen — Guardian/Fee/Status/Actions columns don't fit — and until
+   now overflow-hidden meant those columns were silently CLIPPED, not
+   scrollable: the data was there, just invisible. This lets that exact
+   same card scroll sideways instead, with zero markup changes anywhere,
+   so every existing table on every page gets this for free. Vertical
+   clipping (the other half of overflow-hidden, e.g. for hover shadows)
+   is untouched — only the horizontal axis changes, and only on cards
+   that actually contain a table. */
+@supports selector(:has(a)) {
+  .overflow-hidden:has(> table) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Report pages (components/reports/ReportToolbar.js, ReportFilterBar.js)
+   mark their own filter/export controls print:hidden via Tailwind's print
+   variant — this additionally hides the sidebar itself, since Tailwind's
+   print:hidden on those two components can't reach outside their own tree
+   into components/AppShell.js's <aside>. */
+@media print {
+  aside {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+}
+
+/* Small credit tag (see app/(app)/dashboard/page.js) — a gentle, slow
+   fade+float loop, subtle enough not to distract from the numbers next
+   to it. */
+@keyframes credit-tag-float {
+  0%, 100% {
+    opacity: 0.55;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+.credit-tag {
+  animation: credit-tag-float 3s ease-in-out infinite;
+}
+
+/* Mobile sidebar drawer (components/AppShell.js) — slide-in panel plus its
+   backdrop, shared across every page since AppShell wraps all of them. */
+@keyframes shell-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.shell-backdrop {
+  animation: shell-backdrop-in 0.18s ease-out;
+}
+
+/* ----------------------------------------------------------------------
+   Small, general-purpose motion — a "small amount of animation" applied
+   site-wide without touching any page's layout, spacing, or structure.
+   Nothing here moves, resizes, or reflows anything; it only smooths the
+   transitions between states that already existed (hover, open/close,
+   route change). Respects prefers-reduced-motion throughout.
+   ---------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Every interactive control gets a quick, consistent transition instead
+     of snapping straight to its hover/focus/disabled state — buttons,
+     links, and form fields across the whole app, from one rule instead of
+     an className edit on every one of them. */
+  button, a, select, input, textarea {
+    transition: background-color 150ms ease, border-color 150ms ease,
+      color 150ms ease, box-shadow 150ms ease, opacity 150ms ease,
+      transform 100ms ease;
+  }
+  /* A primary/solid button (bg-royal, bg-brick, bg-sage, etc. — anything
+     that isn't a plain text link) reads as "pressable" with a faint dip on
+     click, same idea as a physical button. Text-only links and disabled
+     controls are excluded so this never fires somewhere it'd look odd. */
+  button:not(:disabled):not(.no-press):active {
+    transform: scale(0.98);
+  }
+
+  /* Table rows across every list page (Students, Transactions, Receipts,
+     Fee Arrears' month lines, etc. all share this exact row shape) get a
+     faint hover highlight with a smooth transition instead of nothing at
+     all — a color addition only, nothing about row height/spacing/layout
+     changes. */
+  tbody tr {
+    transition: background-color 120ms ease;
+  }
+  tbody tr:hover {
+    background-color: rgba(36, 84, 199, 0.035);
+  }
+
+  /* Every list page (Students, Transactions, Receipts, Payroll, every
+     Report table) shares the same <tbody><tr> shape, so one rule gives
+     every one of them a soft staggered entrance — rows settle into place
+     a beat apart instead of all appearing at once — with no page-by-page
+     edits and no change to row height, spacing, or content. Capped at the
+     first 12 rows so a 200-row report doesn't end up with a multi-second
+     cascade; everything past that appears together at the same final
+     delay. `backwards` fill-mode holds each row at its 0%-opacity state
+     during its delay, so nothing flashes fully visible before its turn. */
+  tbody tr {
+    animation: row-in 260ms ease-out backwards;
+  }
+  @keyframes row-in {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  tbody tr:nth-child(1)  { animation-delay: 0ms; }
+  tbody tr:nth-child(2)  { animation-delay: 20ms; }
+  tbody tr:nth-child(3)  { animation-delay: 40ms; }
+  tbody tr:nth-child(4)  { animation-delay: 60ms; }
+  tbody tr:nth-child(5)  { animation-delay: 80ms; }
+  tbody tr:nth-child(6)  { animation-delay: 100ms; }
+  tbody tr:nth-child(7)  { animation-delay: 120ms; }
+  tbody tr:nth-child(8)  { animation-delay: 140ms; }
+  tbody tr:nth-child(9)  { animation-delay: 160ms; }
+  tbody tr:nth-child(10) { animation-delay: 180ms; }
+  tbody tr:nth-child(11) { animation-delay: 200ms; }
+  tbody tr:nth-child(n+12) { animation-delay: 220ms; }
+
+  /* Reusable entrance for anything that already conditionally
+     mounts/unmounts — a dropdown panel, a details/summary reveal, a
+     freshly-routed page. Opacity + a small upward drift, never a resize,
+     so it can't shift anything else on the page. */
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fade-in-up 180ms ease-out;
+  }
+
+  /* For a small floating panel specifically (search results, a typeahead
+     dropdown) — a touch of scale reads as "appearing near the control that
+     opened it" rather than just fading in place. */
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.97) translateY(-2px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .animate-scale-in {
+    animation: scale-in 140ms ease-out;
+    transform-origin: top;
+  }
+
+  /* Every progress/trend bar in the app (Dashboard's Fee Collection Trend,
+     Finance > Reports' payment-method split) shares this exact shape: an
+     h-4 rounded-full track with an inner h-full rounded-full fill whose
+     width comes from an inline style. Targeting that shared shape with one
+     rule — instead of editing each page — makes every one of those bars
+     grow into place on load rather than snapping straight to its final
+     width, with zero change to the numbers, colors, or markup that
+     produce them. */
+  .h-full.rounded-full[style*="width"] {
+    transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}

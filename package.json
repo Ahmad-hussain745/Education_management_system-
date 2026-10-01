@@ -1,0 +1,41 @@
+{
+  "name": "msa-academy-system",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "test": "vitest run",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "web-push": "^3.6.7",
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.4",
+    "dexie": "^4.4.6",
+    "next": "16.3.5",
+    "pdf-lib": "^1.17.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "recharts": "^3.10.1",
+    "resend": "^6.27.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.5",
+    "fake-indexeddb": "^6.2.5",
+    "postcss": "8.5.26",
+    "tailwindcss": "^3.4.13",
+    "vitest": "^5.0.1"
+  },
+  "overrides": {
+    "postcss": "8.5.26"
+  }
+}
